@@ -35,42 +35,47 @@ void AFGPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!IsLocallyControlled())
-	{
-		SetActorTickEnabled(false);
-	}
-
 	MovementComponent->SetUpdatedComponent(CollisionComponent);
 }
 
 void AFGPlayer::Tick(float DeltaTime)
 {
-	
-	Super::Tick(DeltaTime);
+		Super::Tick(DeltaTime);
 
-	const float Friction = IsBraking() ? BrakingFriction : DefaultFriction;
-	const float Alpha = FMath::Clamp(FMath::Abs(MovementVelocity / (MaxVelocity * 0.75f)), 0.0f, 1.0f);
-	const float TurnSpeed = FMath::InterpEaseOut(0.0f, TurnSpeedDefault, Alpha, 5.0f);
-	const float MovementDirection = MovementVelocity > 0.0f ? Turn : -Turn;
+	if (IsLocallyControlled())
+	{
 
-	Yaw += (MovementDirection * TurnSpeed) * DeltaTime;
-	FQuat WantedFacingDirection = FQuat(FVector::UpVector, FMath::DegreesToRadians(Yaw));
-	MovementComponent->SetFacingRotation(WantedFacingDirection);
+		const float Friction = IsBraking() ? BrakingFriction : DefaultFriction;
+		const float Alpha = FMath::Clamp(FMath::Abs(MovementVelocity / (MaxVelocity * 0.75f)), 0.0f, 1.0f);
+		const float TurnSpeed = FMath::InterpEaseOut(0.0f, TurnSpeedDefault, Alpha, 5.0f);
+		const float MovementDirection = MovementVelocity > 0.0f ? Turn : -Turn;
 
-	FFGFrameMovement FrameMovement = MovementComponent->CreateFrameMovement();
+		Yaw += (MovementDirection * TurnSpeed) * DeltaTime;
+		FQuat WantedFacingDirection = FQuat(FVector::UpVector, FMath::DegreesToRadians(Yaw));
+		MovementComponent->SetFacingRotation(WantedFacingDirection);
 
-	MovementVelocity += Forward * Acceleration * DeltaTime;
-	MovementVelocity = FMath::Clamp(MovementVelocity, -MaxVelocity, MaxVelocity);
-	MovementVelocity *= FMath::Pow(Friction, DeltaTime);
+		FFGFrameMovement FrameMovement = MovementComponent->CreateFrameMovement();
 
-	MovementComponent->ApplyGravity();
-	FrameMovement.AddDelta(GetActorForwardVector() * MovementVelocity * DeltaTime);
-	MovementComponent->Move(FrameMovement);
+		MovementVelocity += Forward * Acceleration * DeltaTime;
+		MovementVelocity = FMath::Clamp(MovementVelocity, -MaxVelocity, MaxVelocity);
+		MovementVelocity *= FMath::Pow(Friction, DeltaTime);
 
-	
+		MovementComponent->ApplyGravity();
+		FrameMovement.AddDelta(GetActorForwardVector() * MovementVelocity * DeltaTime);
+		MovementComponent->Move(FrameMovement);
+
+
 		Server_SendLocation(GetActorLocation());
 		Server_SendRotation(GetActorRotation());
-
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *Targetlocation.ToString());
+		FMath::Lerp(GetActorLocation(), Targetlocation, DeltaTime, InterpolationSpeed);
+		FMath::Lerp(GetActorRotation(), TargetRotation, DeltaTime, InterpolationSpeed);
+// 		SetActorLocation(FMath::VInterpTo(GetActorLocation(), Targetlocation, DeltaTime, InterpolationSpeed));
+// 		SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, InterpolationSpeed));
+	}
 }
 
 void AFGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -97,7 +102,7 @@ void AFGPlayer::Multicast_SendRotation_Implementation(const FRotator& Rotation)
 {
 	if (!IsLocallyControlled())
 	{
-		SetActorRotation(Rotation);
+		TargetRotation = Rotation;
 	}
 }
 
@@ -110,7 +115,7 @@ void AFGPlayer::Multicast_SendLocation_Implementation(const FVector& LocationToS
 {
 	if (IsLocallyControlled() == false)
 	{
-		SetActorLocation(LocationToSend);
+		Targetlocation = LocationToSend;
 	}
 }
 

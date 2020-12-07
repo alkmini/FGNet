@@ -71,9 +71,13 @@ private:
 	float Yaw = 0.0f;
 
 	bool bBrake = false;
+	float InterpolationSpeed = 3.0f;
 
 	UPROPERTY()
-	FRotator TargetRotation;
+		FVector Targetlocation;
+
+	UPROPERTY()
+		FRotator TargetRotation;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Collision)
 		USphereComponent* CollisionComponent;
