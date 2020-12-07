@@ -35,11 +35,17 @@ void AFGPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!IsLocallyControlled())
+	{
+		SetActorTickEnabled(false);
+	}
+
 	MovementComponent->SetUpdatedComponent(CollisionComponent);
 }
 
 void AFGPlayer::Tick(float DeltaTime)
 {
+	
 	Super::Tick(DeltaTime);
 
 	const float Friction = IsBraking() ? BrakingFriction : DefaultFriction;
@@ -61,7 +67,10 @@ void AFGPlayer::Tick(float DeltaTime)
 	FrameMovement.AddDelta(GetActorForwardVector() * MovementVelocity * DeltaTime);
 	MovementComponent->Move(FrameMovement);
 
-	Server_SendLocation(GetActorLocation());
+	
+		Server_SendLocation(GetActorLocation());
+		Server_SendRotation(GetActorRotation());
+
 }
 
 void AFGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -82,6 +91,19 @@ int32 AFGPlayer::GetPing() const
 		return static_cast<int32>(GetPlayerState()->GetPing());
 	}
 	return 0;
+}
+
+void AFGPlayer::Multicast_SendRotation_Implementation(const FRotator& Rotation)
+{
+	if (!IsLocallyControlled())
+	{
+		SetActorRotation(Rotation);
+	}
+}
+
+void AFGPlayer::Server_SendRotation_Implementation(const FRotator& Rotation)
+{
+	Multicast_SendRotation(Rotation);
 }
 
 void AFGPlayer::Multicast_SendLocation_Implementation(const FVector& LocationToSend)

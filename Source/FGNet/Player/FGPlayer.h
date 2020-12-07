@@ -52,6 +52,12 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 		void Multicast_SendLocation(const FVector& LocationToSend);
 
+	UFUNCTION(Server, Unreliable)
+		void Server_SendRotation(const FRotator& Rotation);
+
+	UFUNCTION(NetMulticast, Unreliable)
+		void Multicast_SendRotation(const FRotator& Rotation);
+
 private:
 	void Handle_Accelerate(float Value);
 	void Handle_Turn(float Value);
@@ -65,6 +71,9 @@ private:
 	float Yaw = 0.0f;
 
 	bool bBrake = false;
+
+	UPROPERTY()
+	FRotator TargetRotation;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Collision)
 		USphereComponent* CollisionComponent;
