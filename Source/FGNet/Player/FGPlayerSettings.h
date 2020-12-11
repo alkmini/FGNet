@@ -2,12 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
+#include "Engine/DataAsset.h"
 #include "FGPlayerSettings.generated.h"
 
 UCLASS()
-class FGNET_API AFGPlayerSettings : public APawn
+class FGNET_API UFGPlayerSettings : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -26,4 +25,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Movement, meta = (ClampMin = 0.0, ClampMax = 1.0))
 		float BrakingFriction = 0.001f;
+
+	UPROPERTY(EditAnywhere, Category = Fire, meta = (ClampMin = 0.0))
+		float FireCooldown = 0.15f;
 };

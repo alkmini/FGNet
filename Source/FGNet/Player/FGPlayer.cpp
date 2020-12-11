@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Engine/NetDriver.h"
 #include "GameFramework/PlayerState.h"
+#include "FGPlayerSettings.h"
 #include "../Components/FGMovementComponent.h"
 #include "../FGMovementStatics.h"
 
@@ -40,14 +41,18 @@ void AFGPlayer::BeginPlay()
 
 void AFGPlayer::Tick(float DeltaTime)
 {
-		Super::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
+
+	if (!ensure(PlayerSettings != nullptr))
+		return;
 
 	if (IsLocallyControlled())
 	{
-
-		const float Friction = IsBraking() ? BrakingFriction : DefaultFriction;
-		const float Alpha = FMath::Clamp(FMath::Abs(MovementVelocity / (MaxVelocity * 0.75f)), 0.0f, 1.0f);
-		const float TurnSpeed = FMath::InterpEaseOut(0.0f, TurnSpeedDefault, Alpha, 5.0f);
+		const float MaxVelocity = PlayerSettings->MaxVelocity;
+		const float Acceleration = PlayerSettings->Acceleration;
+		const float Friction = IsBraking() ? PlayerSettings->BrakingFriction : PlayerSettings->Friction;
+		const float Alpha = FMath::Clamp(FMath::Abs(MovementVelocity / (PlayerSettings->MaxVelocity * 0.75f)), 0.0f, 1.0f);
+		const float TurnSpeed = FMath::InterpEaseOut(0.0f, PlayerSettings->TurnSpeedDefault, Alpha, 5.0f);
 		const float MovementDirection = MovementVelocity > 0.0f ? Turn : -Turn;
 
 		Yaw += (MovementDirection * TurnSpeed) * DeltaTime;
@@ -73,8 +78,8 @@ void AFGPlayer::Tick(float DeltaTime)
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *Targetlocation.ToString());
 		SetActorLocation(FMath::Lerp(GetActorLocation(), Targetlocation, DeltaTime * InterpolationSpeed));
 		SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation, DeltaTime * InterpolationSpeed));
-// 		SetActorLocation(FMath::VInterpTo(GetActorLocation(), Targetlocation, DeltaTime, InterpolationSpeed));
-// 		SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, InterpolationSpeed));
+		// 		SetActorLocation(FMath::VInterpTo(GetActorLocation(), Targetlocation, DeltaTime, InterpolationSpeed));
+		// 		SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, InterpolationSpeed));
 	}
 }
 
