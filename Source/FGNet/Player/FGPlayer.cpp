@@ -71,8 +71,8 @@ void AFGPlayer::Tick(float DeltaTime)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *Targetlocation.ToString());
-		FMath::Lerp(GetActorLocation(), Targetlocation, DeltaTime, InterpolationSpeed);
-		FMath::Lerp(GetActorRotation(), TargetRotation, DeltaTime, InterpolationSpeed);
+		SetActorLocation(FMath::Lerp(GetActorLocation(), Targetlocation, DeltaTime * InterpolationSpeed));
+		SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation, DeltaTime * InterpolationSpeed));
 // 		SetActorLocation(FMath::VInterpTo(GetActorLocation(), Targetlocation, DeltaTime, InterpolationSpeed));
 // 		SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, InterpolationSpeed));
 	}
