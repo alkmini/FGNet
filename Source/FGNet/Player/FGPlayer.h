@@ -9,6 +9,7 @@ class UFGMovementComponent;
 class UStaticMeshComponent;
 class USphereComponent;
 class UFGPlayerSettings;
+class UFGNetDebugWidget;
 
 UCLASS()
 class FGNET_API AFGPlayer : public APawn

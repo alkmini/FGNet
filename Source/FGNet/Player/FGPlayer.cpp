@@ -69,13 +69,13 @@ void AFGPlayer::Tick(float DeltaTime)
 		FrameMovement.AddDelta(GetActorForwardVector() * MovementVelocity * DeltaTime);
 		MovementComponent->Move(FrameMovement);
 
-
+		UE_LOG(LogTemp, Warning, TEXT("Hey"));
 		Server_SendLocation(GetActorLocation());
 		Server_SendRotation(GetActorRotation());
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *Targetlocation.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *Targetlocation.ToString());
 		SetActorLocation(FMath::Lerp(GetActorLocation(), Targetlocation, DeltaTime * InterpolationSpeed));
 		SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation, DeltaTime * InterpolationSpeed));
 		// 		SetActorLocation(FMath::VInterpTo(GetActorLocation(), Targetlocation, DeltaTime, InterpolationSpeed));
